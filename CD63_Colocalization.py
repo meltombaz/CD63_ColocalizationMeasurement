@@ -79,7 +79,7 @@ for sample, files in file_dict.items():
         with st.expander(f"🔬 Results for {sample}"):
             fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 
-            # Normalize images for display
+            # Normalize for display
             dapi_norm = dapi_corrected / dapi_corrected.max() if dapi_corrected.max() != 0 else dapi_corrected
             egfp_norm = egfp_corrected / egfp_corrected.max() if egfp_corrected.max() != 0 else egfp_corrected
 
@@ -93,30 +93,30 @@ for sample, files in file_dict.items():
             axes[0, 1].set_title("EGFP (Green)")
             axes[0, 1].axis('off')
 
-            # Composite overlay DAPI + EGFP
-            composite_rgb = np.dstack((egfp_norm, dapi_norm, np.zeros_like(dapi_norm)))
+            # Composite overlay DAPI + EGFP (Blue + Green)
+            composite_rgb = np.dstack((np.zeros_like(dapi_norm), egfp_norm, dapi_norm))
             axes[0, 2].imshow(composite_rgb)
             axes[0, 2].set_title("Composite Overlay (DAPI+EGFP)")
             axes[0, 2].axis('off')
 
-            # Colocalization mask as 'hot/fire' on black
+            # Colocalization mask as 'hot' (fire palette)
             axes[1, 0].imshow(colocalization_mask, cmap='hot')
             axes[1, 0].set_title("Colocalization Mask (AND, Fire palette)")
             axes[1, 0].axis('off')
 
-            # Overlay of composite + AND mask (fire on top)
+            # Composite + AND overlay (boost Red channel with mask)
             overlay_combined = composite_rgb.copy()
-            # Add 'fire' colocalization to red channel
             overlay_combined[:, :, 0] = np.clip(overlay_combined[:, :, 0] + colocalization_mask.astype(float), 0, 1)
             axes[1, 1].imshow(overlay_combined)
             axes[1, 1].set_title("Composite + Colocalization Overlay")
             axes[1, 1].axis('off')
 
-            # Empty plot for future customization (or metrics)
+            # Empty for future stats or text
             axes[1, 2].axis('off')
 
             plt.tight_layout()
             st.pyplot(fig)
+
 
 # --- Summary Table ---
 if results:
