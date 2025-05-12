@@ -57,86 +57,83 @@ for sample, files in file_dict.items():
         egfp_mask = egfp_corrected > filters.threshold_otsu(egfp_corrected)
         dapi_mask = dapi_corrected > filters.threshold_otsu(dapi_corrected)
 
-        # --- AND Operation (Colocalization Mask) ---
+        # --- Colocalization Mask (AND) ---
         colocalization_mask = egfp_mask & dapi_mask
         colocalization_intensity = (egfp_corrected * colocalization_mask).sum()
 
-        # --- Count Nuclei in DAPI ---
+        # --- DAPI Nuclei Counting ---
         dapi_clean = morphology.remove_small_objects(dapi_mask, min_size=20)
         dapi_labels = measure.label(dapi_clean)
         dapi_count = len(measure.regionprops(dapi_labels))
 
+        # --- Intensity per Cell ---
         intensity_per_cell = colocalization_intensity / dapi_count if dapi_count > 0 else 0
 
-        scaling_factor = 1000  # kilo
+        # --- Scaling for Presentation (k.a.u.) ---
+        scaling_factor = 1000  # kilo a.u.
         scaled_coloc_intensity = colocalization_intensity / scaling_factor
 
+        # --- Append to Results ---
         results.append({
             "Sample": sample,
-            "Total Colocalization Intensity (k.a.u.)": round(scaled_coloc_intensity, 2),
+            "Total Colocalization Intensity (k.a.u.)": scaled_coloc_intensity,
             "DAPI+ Nuclei Count (cells)": dapi_count,
-            "Colocalization Intensity per Cell (a.u./cell)": round(intensity_per_cell, 2)
+            "Colocalization Intensity per Cell (a.u./cell)": intensity_per_cell
         })
-
 
         # --- Visualization ---
         with st.expander(f"🔬 Results for {sample}"):
             fig, axes = plt.subplots(2, 2, figsize=(18, 10))
 
-            # Normalize for display
+            # Normalize images for display
             dapi_norm = dapi_corrected / dapi_corrected.max() if dapi_corrected.max() != 0 else dapi_corrected
             egfp_norm = egfp_corrected / egfp_corrected.max() if egfp_corrected.max() != 0 else egfp_corrected
 
-            # DAPI image (Blue on black)
+            # DAPI (Blue on Black)
             dapi_rgb = np.dstack((np.zeros_like(dapi_norm), np.zeros_like(dapi_norm), dapi_norm))
             axes[0, 0].imshow(dapi_rgb)
             axes[0, 0].set_title("DAPI (Blue)")
             axes[0, 0].axis('off')
 
-            # EGFP image (Green on black)
+            # EGFP (Green on Black)
             egfp_rgb = np.dstack((np.zeros_like(egfp_norm), egfp_norm, np.zeros_like(egfp_norm)))
             axes[0, 1].imshow(egfp_rgb)
             axes[0, 1].set_title("EGFP (Green)")
             axes[0, 1].axis('off')
 
-            # Composite overlay DAPI + EGFP (Blue + Green)
+            # Composite (Blue + Green)
             composite_rgb = np.dstack((np.zeros_like(dapi_norm), egfp_norm, dapi_norm))
             axes[1, 0].imshow(composite_rgb)
             axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
-            
-            # Convert colocalization mask to float32 explicitly
-            coloc_norm = colocalization_mask.astype(np.float32)
 
-            # Normalize to 0-1 (if not empty)
+            # Colocalization (Purple on Black)
+            coloc_norm = colocalization_mask.astype(np.float32)
             if coloc_norm.max() != 0:
                 coloc_norm /= coloc_norm.max()
-
-            # Stack RGB manually (Purple: Red + Blue channels)
-            coloc_rgb = np.dstack((
-                coloc_norm,                      # Red channel
-                np.zeros_like(coloc_norm),       # Green channel (empty)
-                coloc_norm                       # Blue channel
-            ))
-
-            # Display
+            coloc_rgb = np.dstack((coloc_norm, np.zeros_like(coloc_norm), coloc_norm))
             axes[1, 1].imshow(coloc_rgb)
-            axes[1, 1].set_title("Colocalization Mask (Purple on Black)")
+            axes[1, 1].set_title("Colocalization Mask (Purple)")
             axes[1, 1].axis('off')
 
             plt.tight_layout()
             st.pyplot(fig)
 
-
 # --- Summary Table ---
 if results:
     st.subheader("📊 Summary Table")
-    df_results = pd.DataFrame(results)
-    st.dataframe(df_results)
 
-    # CSV download button
+    # Format DataFrame for better visuals
+    df_results = pd.DataFrame(results)
+    df_results["Total Colocalization Intensity (k.a.u.)"] = df_results["Total Colocalization Intensity (k.a.u.)"].apply(lambda x: f"{x:,.2f}")
+    df_results["Colocalization Intensity per Cell (a.u./cell)"] = df_results["Colocalization Intensity per Cell (a.u./cell)"].apply(lambda x: f"{x:,.2f}")
+
+    st.dataframe(df_results, use_container_width=True)
+
+    # CSV Download
     csv = df_results.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download Results CSV", data=csv, file_name="colocalization_intensity_summary.csv", mime="text/csv")
+
 else:
     if uploaded_files:
         st.warning("⚠️ No valid EGFP + DAPI pairs found.")
