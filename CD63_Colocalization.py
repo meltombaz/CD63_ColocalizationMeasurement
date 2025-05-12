@@ -68,12 +68,16 @@ for sample, files in file_dict.items():
 
         intensity_per_cell = colocalization_intensity / dapi_count if dapi_count > 0 else 0
 
+        scaling_factor = 1000  # kilo
+        scaled_coloc_intensity = colocalization_intensity / scaling_factor
+
         results.append({
             "Sample": sample,
-            "Total Colocalization Intensity": colocalization_intensity,
-            "DAPI+ Nuclei Count": dapi_count,
-            "Intensity per Cell": f"{intensity_per_cell:.2f}"
+            "Total Colocalization Intensity (k.a.u.)": round(scaled_coloc_intensity, 2),
+            "DAPI+ Nuclei Count (cells)": dapi_count,
+            "Colocalization Intensity per Cell (a.u./cell)": round(intensity_per_cell, 2)
         })
+
 
         # --- Visualization ---
         with st.expander(f"🔬 Results for {sample}"):
