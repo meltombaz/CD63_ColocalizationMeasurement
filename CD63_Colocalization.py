@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 
-# --- Page config and style ---
+# --- Page config ---
 st.set_page_config(page_title="EGFP-DAPI Colocalization Analysis", page_icon="🔬", layout="wide")
-
 st.title("EGFP-DAPI Colocalization Intensity Analysis 🔬")
 
 # --- File uploader ---
@@ -22,7 +21,7 @@ uploaded_files = st.file_uploader(
 def extract_sample_key(filename):
     parts = filename.replace(".tif", "").split("_")
     if len(parts) >= 3:
-        return "_".join(parts[-3:])  # Customize based on your naming convention
+        return "_".join(parts[-3:])  # Customize this pattern if needed
     return None
 
 # --- Group files by sample key ---
@@ -49,10 +48,10 @@ for sample, files in file_dict.items():
 
         # --- Background Subtraction ---
         egfp_background = filters.gaussian(egfp_image, sigma=10)
-        egfp_corrected = egfp_image - egfp_background
+        egfp_corrected = np.clip(egfp_image - egfp_background, 0, None)
 
         dapi_background = filters.gaussian(dapi_image, sigma=10)
-        dapi_corrected = dapi_image - dapi_background
+        dapi_corrected = np.clip(dapi_image - dapi_background, 0, None)
 
         # --- Binary Masks ---
         egfp_mask = egfp_corrected > filters.threshold_otsu(egfp_corrected)
@@ -78,24 +77,43 @@ for sample, files in file_dict.items():
 
         # --- Visualization ---
         with st.expander(f"🔬 Results for {sample}"):
-            fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-            
-            axes[0, 0].imshow(egfp_corrected, cmap='Greens')
-            axes[0, 0].set_title("Background-subtracted EGFP")
+            fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 
-            axes[0, 1].imshow(dapi_corrected, cmap='Blues')
-            axes[0, 1].set_title("Background-subtracted DAPI")
+            # Normalize images for display
+            dapi_norm = dapi_corrected / dapi_corrected.max() if dapi_corrected.max() != 0 else dapi_corrected
+            egfp_norm = egfp_corrected / egfp_corrected.max() if egfp_corrected.max() != 0 else egfp_corrected
 
+            # DAPI image (Blue)
+            axes[0, 0].imshow(dapi_norm, cmap='Blues')
+            axes[0, 0].set_title("DAPI (Blue)")
+            axes[0, 0].axis('off')
+
+            # EGFP image (Green)
+            axes[0, 1].imshow(egfp_norm, cmap='Greens')
+            axes[0, 1].set_title("EGFP (Green)")
+            axes[0, 1].axis('off')
+
+            # Composite overlay DAPI + EGFP
+            composite_rgb = np.dstack((egfp_norm, dapi_norm, np.zeros_like(dapi_norm)))
+            axes[0, 2].imshow(composite_rgb)
+            axes[0, 2].set_title("Composite Overlay (DAPI+EGFP)")
+            axes[0, 2].axis('off')
+
+            # Colocalization mask as 'hot/fire' on black
             axes[1, 0].imshow(colocalization_mask, cmap='hot')
-            axes[1, 0].set_title("Colocalization Mask (AND)")
+            axes[1, 0].set_title("Colocalization Mask (AND, Fire palette)")
+            axes[1, 0].axis('off')
 
-            overlay = np.dstack((
-                dapi_corrected / dapi_corrected.max(),
-                egfp_corrected / egfp_corrected.max(),
-                colocalization_mask.astype(float)
-            ))
-            axes[1, 1].imshow(overlay)
-            axes[1, 1].set_title("Overlay (DAPI + EGFP + Colocalization)")
+            # Overlay of composite + AND mask (fire on top)
+            overlay_combined = composite_rgb.copy()
+            # Add 'fire' colocalization to red channel
+            overlay_combined[:, :, 0] = np.clip(overlay_combined[:, :, 0] + colocalization_mask.astype(float), 0, 1)
+            axes[1, 1].imshow(overlay_combined)
+            axes[1, 1].set_title("Composite + Colocalization Overlay")
+            axes[1, 1].axis('off')
+
+            # Empty plot for future customization (or metrics)
+            axes[1, 2].axis('off')
 
             plt.tight_layout()
             st.pyplot(fig)
