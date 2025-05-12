@@ -77,7 +77,7 @@ for sample, files in file_dict.items():
 
         # --- Visualization ---
         with st.expander(f"🔬 Results for {sample}"):
-            fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+            fig, axes = plt.subplots(2, 2, figsize=(18, 10))
 
             # Normalize for display
             dapi_norm = dapi_corrected / dapi_corrected.max() if dapi_corrected.max() != 0 else dapi_corrected
@@ -95,17 +95,14 @@ for sample, files in file_dict.items():
 
             # Composite overlay DAPI + EGFP (Blue + Green)
             composite_rgb = np.dstack((np.zeros_like(dapi_norm), egfp_norm, dapi_norm))
-            axes[0, 2].imshow(composite_rgb)
-            axes[0, 2].set_title("Composite Overlay (DAPI+EGFP)")
-            axes[0, 2].axis('off')
-
-            # Colocalization mask as 'hot' (fire palette)
-            axes[1, 0].imshow(colocalization_mask, cmap='hot')
-            axes[1, 0].set_title("Colocalization Mask (AND)")
+            axes[1, 0].imshow(composite_rgb)
+            axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
 
-            # Empty for future stats or text
-            axes[1, 2].axis('off')
+            # Colocalization mask as 'hot' (fire palette)
+            axes[1, 1].imshow(colocalization_mask, cmap='hot')
+            axes[1, 1].set_title("Colocalization Mask (AND)")
+            axes[1, 1].axis('off')
 
             plt.tight_layout()
             st.pyplot(fig)
