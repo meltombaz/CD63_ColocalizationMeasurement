@@ -11,7 +11,15 @@ from collections import defaultdict
 st.set_page_config(page_title="EGFP-DAPI Colocalization Analysis", page_icon="🐱", layout="wide")
 
 # --- Add fun GIF banner ---
-st.image("https://media2.giphy.com/media/hXGYf4Xc9fK3JIVTTQ/giphy.gif?cid=6c09b952jt6sx8mjqj6uta4w5d6qfkw9qkwxqhjpfk42gac7&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g")
+st.markdown(
+    """
+    <div style="display: flex; justify-content: center;">
+        <img src="https://media2.giphy.com/media/hXGYf4Xc9fK3JIVTTQ/giphy.gif?cid=6c09b952jt6sx8mjqj6uta4w5d6qfkw9qkwxqhjpfk42gac7&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" width="400">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # --- App title ---
 st.title("EGFP-DAPI Colocalization Intensity Analysis 🐱")
