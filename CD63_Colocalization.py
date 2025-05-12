@@ -81,12 +81,12 @@ for sample, files in file_dict.items():
         dapi_labels = measure.label(dapi_clean)
         dapi_count = len(measure.regionprops(dapi_labels))
 
-        # --- Intensity per Cell ---
-        intensity_per_cell = colocalization_intensity / dapi_count if dapi_count > 0 else 0
-
         # --- Scaling for Presentation (k.a.u.) ---
         scaling_factor = 1000  # kilo a.u.
         scaled_coloc_intensity = colocalization_intensity / scaling_factor
+
+        # --- Intensity per Cell ---
+        intensity_per_cell = scaled_coloc_intensity / dapi_count if dapi_count > 0 else 0
 
         # --- Append to Results ---
         results.append({
