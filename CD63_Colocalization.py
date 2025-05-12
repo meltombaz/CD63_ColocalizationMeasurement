@@ -102,7 +102,7 @@ for sample, files in file_dict.items():
             axes[1, 0].axis('off')
             
             # Colocalization mask as 'plasma' (purple-yellow palette)
-            axes[1, 1].imshow(colocalization_mask, cmap='purple')
+            axes[1, 1].imshow(colocalization_mask, cmap='gray')
             axes[1, 1].set_title("Colocalization Mask (AND, Plasma Palette)")
             axes[1, 1].axis('off')
 
