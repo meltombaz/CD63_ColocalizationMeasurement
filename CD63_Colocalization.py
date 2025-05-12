@@ -7,8 +7,15 @@ import pandas as pd
 from collections import defaultdict
 
 # --- Page config ---
-st.set_page_config(page_title="EGFP-DAPI Colocalization Analysis", page_icon="🔬", layout="wide")
-st.title("EGFP-DAPI Colocalization Intensity Analysis 🔬")
+# --- Page config ---
+st.set_page_config(page_title="EGFP-DAPI Colocalization Analysis", page_icon="🐱", layout="wide")
+
+# --- Add fun GIF banner ---
+st.image("https://media2.giphy.com/media/hXGYf4Xc9fK3JIVTTQ/giphy.gif?cid=6c09b952jt6sx8mjqj6uta4w5d6qfkw9qkwxqhjpfk42gac7&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g")
+
+# --- App title ---
+st.title("EGFP-DAPI Colocalization Intensity Analysis 🐱")
+
 
 # --- File uploader ---
 uploaded_files = st.file_uploader(
