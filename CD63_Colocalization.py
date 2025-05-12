@@ -101,10 +101,21 @@ for sample, files in file_dict.items():
             axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
             
-            # Colocalization mask as 'plasma' (purple-yellow palette)
-            # Colocalization image (Purple on black)
-            # Purple is R + B channels
-            coloc_rgb = np.dstack((coloc_norm, np.zeros_like(coloc_norm), coloc_norm))
+            # Convert colocalization mask to float32 explicitly
+            coloc_norm = colocalization_mask.astype(np.float32)
+
+            # Normalize to 0-1 (if not empty)
+            if coloc_norm.max() != 0:
+                coloc_norm /= coloc_norm.max()
+
+            # Stack RGB manually (Purple: Red + Blue channels)
+            coloc_rgb = np.dstack((
+                coloc_norm,                      # Red channel
+                np.zeros_like(coloc_norm),       # Green channel (empty)
+                coloc_norm                       # Blue channel
+            ))
+
+            # Display
             axes[1, 1].imshow(coloc_rgb)
             axes[1, 1].set_title("Colocalization Mask (Purple on Black)")
             axes[1, 1].axis('off')
