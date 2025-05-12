@@ -84,12 +84,12 @@ for sample, files in file_dict.items():
             egfp_norm = egfp_corrected / egfp_corrected.max() if egfp_corrected.max() != 0 else egfp_corrected
 
             # DAPI image (Blue)
-            axes[0, 0].imshow(dapi_norm, cmap='Blues')
+            axes[0, 0].imshow(dapi_norm, cmap='gray')
             axes[0, 0].set_title("DAPI (Blue)")
             axes[0, 0].axis('off')
 
             # EGFP image (Green)
-            axes[0, 1].imshow(egfp_norm, cmap='Greens')
+            axes[0, 1].imshow(egfp_norm, cmap='gray')
             axes[0, 1].set_title("EGFP (Green)")
             axes[0, 1].axis('off')
 
@@ -101,15 +101,8 @@ for sample, files in file_dict.items():
 
             # Colocalization mask as 'hot' (fire palette)
             axes[1, 0].imshow(colocalization_mask, cmap='hot')
-            axes[1, 0].set_title("Colocalization Mask (AND, Fire palette)")
+            axes[1, 0].set_title("Colocalization Mask (AND)")
             axes[1, 0].axis('off')
-
-            # Composite + AND overlay (boost Red channel with mask)
-            overlay_combined = composite_rgb.copy()
-            overlay_combined[:, :, 0] = np.clip(overlay_combined[:, :, 0] + colocalization_mask.astype(float), 0, 1)
-            axes[1, 1].imshow(overlay_combined)
-            axes[1, 1].set_title("Composite + Colocalization Overlay")
-            axes[1, 1].axis('off')
 
             # Empty for future stats or text
             axes[1, 2].axis('off')
