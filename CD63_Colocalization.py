@@ -5,6 +5,8 @@ from skimage import filters, measure, morphology
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
 
 # --- Page config ---
 st.set_page_config(page_title="EGFP-DAPI Colocalization Analysis", page_icon="🔬", layout="wide")
@@ -101,18 +103,20 @@ for sample, files in file_dict.items():
             axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
 
-            # Colocalization mask as 'plasma' (purple-yellow palette)
-            # Ensure mask is float for visualization (0 to 1)
+            # Convert colocalization mask to float
             coloc_display = colocalization_mask.astype(float)
 
-            # Set background explicitly to black (stay 0), colocalization as plasma
-            # Mask will stay 0 for background, colocalization pixels scaled to 1
-            axes[1, 1].imshow(coloc_display, cmap='plasma', vmin=0.001, vmax=1)
+            # Apply plasma colormap normalization
+            norm = Normalize(vmin=coloc_display[coloc_display > 0].min(), vmax=coloc_display.max())
+            coloc_colormap = cm.plasma(norm(coloc_display))
 
+            # Manually set background pixels (mask == 0) to black
+            coloc_colormap[coloc_display == 0] = [0, 0, 0, 1]  # RGB=black, Alpha=1
+
+            # Plot the custom RGBA image
+            axes[1, 1].imshow(coloc_colormap)
             axes[1, 1].set_title("Colocalization Mask (AND, Plasma Palette)")
             axes[1, 1].axis('off')
-
-
 
             plt.tight_layout()
             st.pyplot(fig)
