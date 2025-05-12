@@ -100,11 +100,18 @@ for sample, files in file_dict.items():
             axes[1, 0].imshow(composite_rgb)
             axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
-            
+
             # Colocalization mask as 'plasma' (purple-yellow palette)
-            axes[1, 1].imshow(colocalization_mask, cmap='plasma')
+            # Ensure mask is float for visualization (0 to 1)
+            coloc_display = colocalization_mask.astype(float)
+
+            # Set background explicitly to black (stay 0), colocalization as plasma
+            # Mask will stay 0 for background, colocalization pixels scaled to 1
+            axes[1, 1].imshow(coloc_display, cmap='plasma', vmin=0.001, vmax=1)
+
             axes[1, 1].set_title("Colocalization Mask (AND, Plasma Palette)")
             axes[1, 1].axis('off')
+
 
 
             plt.tight_layout()
