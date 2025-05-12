@@ -100,11 +100,12 @@ for sample, files in file_dict.items():
             axes[1, 0].imshow(composite_rgb)
             axes[1, 0].set_title("Composite Overlay (DAPI+EGFP)")
             axes[1, 0].axis('off')
-
-            # Colocalization mask as 'hot' (fire palette)
-            axes[1, 1].imshow(colocalization_mask, cmap='hot')
-            axes[1, 1].set_title("Colocalization Mask (AND)")
+            
+            # Colocalization mask as 'plasma' (purple-yellow palette)
+            axes[1, 1].imshow(colocalization_mask, cmap='plasma')
+            axes[1, 1].set_title("Colocalization Mask (AND, Plasma Palette)")
             axes[1, 1].axis('off')
+
 
             plt.tight_layout()
             st.pyplot(fig)
