@@ -102,10 +102,12 @@ for sample, files in file_dict.items():
             axes[1, 0].axis('off')
             
             # Colocalization mask as 'plasma' (purple-yellow palette)
-            axes[1, 1].imshow(colocalization_mask, cmap='gray')
-            axes[1, 1].set_title("Colocalization Mask (AND, Plasma Palette)")
+            # Colocalization image (Purple on black)
+            # Purple is R + B channels
+            coloc_rgb = np.dstack((coloc_norm, np.zeros_like(coloc_norm), coloc_norm))
+            axes[1, 1].imshow(coloc_rgb)
+            axes[1, 1].set_title("Colocalization Mask (Purple on Black)")
             axes[1, 1].axis('off')
-
 
             plt.tight_layout()
             st.pyplot(fig)
