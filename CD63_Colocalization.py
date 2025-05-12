@@ -83,13 +83,15 @@ for sample, files in file_dict.items():
             dapi_norm = dapi_corrected / dapi_corrected.max() if dapi_corrected.max() != 0 else dapi_corrected
             egfp_norm = egfp_corrected / egfp_corrected.max() if egfp_corrected.max() != 0 else egfp_corrected
 
-            # DAPI image (Blue)
-            axes[0, 0].imshow(dapi_norm, cmap='gray')
+            # DAPI image (Blue on black)
+            dapi_rgb = np.dstack((np.zeros_like(dapi_norm), np.zeros_like(dapi_norm), dapi_norm))
+            axes[0, 0].imshow(dapi_rgb)
             axes[0, 0].set_title("DAPI (Blue)")
             axes[0, 0].axis('off')
 
-            # EGFP image (Green)
-            axes[0, 1].imshow(egfp_norm, cmap='gray')
+            # EGFP image (Green on black)
+            egfp_rgb = np.dstack((np.zeros_like(egfp_norm), egfp_norm, np.zeros_like(egfp_norm)))
+            axes[0, 1].imshow(egfp_rgb)
             axes[0, 1].set_title("EGFP (Green)")
             axes[0, 1].axis('off')
 
